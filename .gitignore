@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+.next/
+out/
+cdk.out/
+*.js.map
+*.d.ts
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# Turbo
+.turbo/
+
+# AWS
+.aws-sam/
+samconfig.toml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Secrets - NEVER commit these
+*.pem
+*.key
+credentials
