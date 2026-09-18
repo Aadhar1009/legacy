@@ -33,6 +33,9 @@ app.use('*', async (c, next) => {
 // Apply tenant context middleware to API routes
 app.use('/api/v1/*', tenantContext);
 
+import { briefingRoutes } from './routes/briefing';
+import { demoRoutes } from './routes/demo';
+
 // Routes
 app.route('/', healthRoutes);
 app.route('/api/v1/businesses', businessRoutes);
@@ -42,6 +45,8 @@ app.route('/api/v1/memory', memoryRoutes);
 app.route('/api/v1/suppliers', supplierRoutes);
 app.route('/api/v1/alerts', alertRoutes);
 app.route('/api/v1/tasks', taskRoutes);
+app.route('/api/v1/briefing', briefingRoutes);
+app.route('/api/v1/demo', demoRoutes);
 
 // Global Error Handler
 app.onError((err, c) => {

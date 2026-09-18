@@ -174,17 +174,27 @@ export interface DocumentRecord {
 }
 
 export interface ExtractionResult {
-  supplier_name?: string;
-  invoice_number?: string;
-  invoice_date?: string;
-  due_date?: string;
-  line_items: LineItem[];
-  subtotal_paise?: number;
-  tax_paise?: number;
-  total_paise?: number;
-  currency: string;
-  payment_terms?: string;
-  confidence_scores: Record<string, number>;
+  supplier: {
+    name: string;
+    contact?: string;
+    phone?: string;
+    gstin?: string;
+    location?: string;
+  };
+  invoice: {
+    date: string;
+    total_paise: number;
+    eway_bill?: string; // India Specific: E-Way Bill tracking
+    bilty_number?: string; // India Specific: Logistics/Transport LR Number
+    credit_days?: number; // India Specific: Khata / Credit terms
+  };
+  items: Array<{
+    product_name: string;
+    category?: string;
+    hsn?: string;
+    quantity: number;
+    unit_price_paise: number;
+  }>;
   requires_human_review: boolean;
   raw_textract_fields?: Record<string, unknown>;
 }
@@ -342,18 +352,40 @@ export interface AuditEvent {
 
 // ─── Memory Event (Memory Evolution) ────────────────────────────────────────
 
+export type MemoryChangeType = 'CREATED' | 'UPDATED' | 'SUPERSEDED' | 'CORRECTED' | 'MERGED' | 'DEPRECATED';
+
 export interface MemoryEvent {
   memory_event_id: string;
   tenant_id: string;
   entity_id: string;
-  field: string;
+  entity_type: EntityType;
+  attribute: string;
   old_value: string | null;
   new_value: string;
-  source_id: string;
-  reason: string;
+  change_type: MemoryChangeType;
+  source_ids: string[];
+  actor_type: 'USER' | 'SYSTEM' | 'AGENT';
+  actor_id: string;
   timestamp: string;
-  actor: string;
   confidence: ConfidenceLevel;
+  status: 'ACTIVE' | 'SUPERSEDED' | 'INVALIDATED';
+}
+
+// ─── Memory Gap ─────────────────────────────────────────────────────────────
+
+export type MemoryGapType = 'MISSING_FIELD' | 'CONFLICTING_FACT' | 'MISSING_SOURCE' | 'AMBIGUOUS_ENTITY' | 'STALE_MEMORY' | 'UNVERIFIED_RELATIONSHIP' | 'MISSING_OUTCOME';
+
+export interface MemoryGap {
+  gap_id: string;
+  tenant_id: string;
+  entity_id: string;
+  gap_type: MemoryGapType;
+  description: string;
+  severity: AlertSeverity;
+  evidence_ids: string[];
+  suggested_resolution?: string;
+  status: 'OPEN' | 'RESOLVED' | 'IGNORED';
+  created_at: string;
 }
 
 // ─── API Response Types ─────────────────────────────────────────────────────

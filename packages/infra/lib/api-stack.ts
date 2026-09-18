@@ -24,7 +24,7 @@ export class ApiStack extends cdk.Stack {
     super(scope, id, props);
 
     const apiHandler = new nodejs.NodejsFunction(this, 'ApiHandlerFunction', {
-      entry: path.join(__dirname, '../lambda/api/index.ts'), // Assuming hono app
+      entry: path.join(__dirname, '../../api/src/index.ts'), // Assuming hono app
       handler: 'handler',
       runtime: lambda.Runtime.NODEJS_20_X,
       architecture: lambda.Architecture.ARM_64,
