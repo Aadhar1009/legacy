@@ -14,7 +14,7 @@ export default function Login() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login
+    // Simulate login for offline demo
     setTimeout(() => {
       router.push('/dashboard');
     }, 1000);
@@ -29,7 +29,7 @@ export default function Login() {
       <form onSubmit={handleLogin} className="space-y-4">
         <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <Button type="submit" className="w-full" isLoading={isLoading}>Sign In</Button>
+        <Button type="submit" className="w-full" isLoading={isLoading}>Sign In (Offline Demo)</Button>
       </form>
       <div className="mt-6 text-center text-sm text-slate-500">
         Don't have an account? <Link href="/signup" className="text-primary font-medium hover:underline">Sign up</Link>

@@ -3,7 +3,41 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-surface-50 text-slate-900;
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
+    --border: 0 0% 9%;
   }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-white selection:text-black;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl;
+  }
+  .cinematic-glow {
+    box-shadow: 0 0 80px -20px rgba(255,255,255,0.15);
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground;
 }

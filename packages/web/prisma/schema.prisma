@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Business {
+  id          String   @id @default(cuid())
+  name        String
+  ownerName   String
+  industry    String
+  established String?
+  createdAt   DateTime @default(now())
+  
+  knowledge   KnowledgeNode[]
+}
+
+model KnowledgeNode {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  
+  question    String
+  answer      String
+  category    String   // e.g., "Supplier Policy", "Returns", "Logistics"
+  source      String   // e.g., "Owner Onboarding", "WhatsApp", "Call Log"
+  
+  createdAt   DateTime @default(now())
+}
+
+model CommunicationLog {
+  id          String   @id @default(cuid())
+  businessId  String
+  platform    String   // "WhatsApp", "Call", "SMS"
+  sender      String
+  content     String
+  timestamp   DateTime @default(now())
+}

@@ -1,43 +1,49 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
-import goldenDataset from '../../../../tests/evals/golden_dataset.json';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-const OFFLINE_MODE = process.env.NEXT_PUBLIC_OFFLINE_MODE === 'true';
+
+export type LoreConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface LoreEvent {
+  id: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  actor: string;
+}
+
+export interface LoreEntity {
+  id: string;
+  name: string;
+  type: 'PERSON' | 'COMPANY' | 'PRODUCT' | 'POLICY' | 'DOCUMENT';
+  relation?: string;
+  isConcentratedRisk?: boolean;
+}
+
+export interface LoreSource {
+  id: string;
+  documentName: string;
+  excerpt: string;
+  confidence: LoreConfidence;
+  date: string;
+  type: 'WHATSAPP' | 'VOICE_NOTE' | 'INVOICE' | 'SOP';
+}
+
+export interface LoreResponse {
+  answer: string;
+  entities: LoreEntity[];
+  events: LoreEvent[];
+  sources: LoreSource[];
+  busFactorAlert?: {
+    level: 'CRITICAL' | 'WARNING' | 'SAFE';
+    message: string;
+  };
+}
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-  // --- OFFLINE MOCK MODE FOR USABILITY TESTING ---
-  if (OFFLINE_MODE) {
-    console.log(`[Offline Mode] Intercepting request to ${endpoint}`);
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate latency
-    
-    if (endpoint.includes('/memory/query')) {
-      return {
-        data: {
-          answer: "Based on our records, Samsung charged you ₹36,000 for the 55 inch TV on Oct 12, 2023, but the price increased to ₹37,000 on Nov 5, 2023.",
-          confidence: "HIGH",
-          claims: [
-            { statement: "Initial price was ₹36,000", type: "FACT", evidence_ids: ["INV-1001", "P1"], confidence: "HIGH" },
-            { statement: "Price increased to ₹37,000", type: "FACT", evidence_ids: ["INV-1002", "P1"], confidence: "HIGH" }
-          ],
-          evidence_ids: ["INV-1001", "INV-1002"]
-        }
-      };
-    }
-    
-    if (endpoint.includes('/briefing')) {
-      return {
-        data: {
-          business_profile: goldenDataset.business.name,
-          top_suppliers: goldenDataset.suppliers.map(s => ({ name: s.name, latest_price: null })),
-          open_alerts: [{ title: 'Samsung 55" TV Warranty Expiring Soon', severity: 'MEDIUM' }],
-          known_memory_gaps: [],
-          recent_changes: [{ field: 'latest_price_paise', old: '3600000', new: '3700000' }]
-        }
-      };
-    }
-    return { data: {} };
+  if (!API_URL) {
+    throw new Error('API_URL is not configured. Backend is blocked until deployed.');
   }
-  // --- END OFFLINE MODE ---
 
   try {
     const session = await fetchAuthSession();
@@ -55,7 +61,7 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     });
 
     if (!response.ok) {
-      throw new Error('API Request failed');
+      throw new Error(`API Request failed with status ${response.status}`);
     }
 
     return response.json();
@@ -67,9 +73,21 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 
 export const apiClient = {
   getStats: () => fetchWithAuth('/stats'),
-  queryMemory: (query: string) => fetchWithAuth('/memory/query', {
-    method: 'POST',
-    body: JSON.stringify({ query })
-  }),
-  getBriefing: () => fetchWithAuth('/briefing'),
+  queryLoreEngine: async (query: string): Promise<LoreResponse> => {
+    // REAL CALL to Hono backend
+    const res = await fetchWithAuth('/api/v1/memory/query', {
+      method: 'POST',
+      body: JSON.stringify({ query })
+    });
+    return res.data;
+  },
+  uploadDocument: async (fileBuffer: Buffer, filename: string) => {
+    // Stub definition for local sync daemon payload.
+    // In a real browser context, this would use FormData.
+    const res = await fetchWithAuth('/api/v1/documents', {
+      method: 'POST',
+      body: JSON.stringify({ filename, content: fileBuffer.toString('base64') })
+    });
+    return res.data;
+  }
 };
